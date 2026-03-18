@@ -3,7 +3,6 @@
 
 import { useEffect, useRef } from 'react'
 
-const LETTER_COUNT    = 35
 const MOUSE_REPEL_DIST  = 120
 const MOUSE_REPEL_FORCE = 0.022
 const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789{}[]<>/\\|@#$%'
@@ -22,6 +21,7 @@ export default function ParticleCanvas() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
+    const LETTER_COUNT = window.innerWidth < 768 ? 15 : 35
     let W = 0, H = 0, letters: Letter[] = [], raf: number
     const mouse = { x: -9999, y: -9999 }
 
@@ -72,7 +72,18 @@ export default function ParticleCanvas() {
     draw()
     window.addEventListener('mousemove',  e  => { mouse.x = e.clientX; mouse.y = e.clientY })
     window.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999 })
-    window.addEventListener('resize',     () => { resize(); letters = Array.from({ length: LETTER_COUNT }, createLetter) })
+    window.addEventListener('resize', () => {
+      resize()
+      const count = window.innerWidth < 768 ? 20 : 45
+      if (letters.length !== count) {
+        letters = Array.from({ length: count }, createLetter)
+      } else {
+        letters.forEach(l => {
+          l.x = Math.min(l.x, W)
+          l.y = Math.min(l.y, H)
+        })
+      }
+    })
 
     return () => cancelAnimationFrame(raf)
   }, [])
