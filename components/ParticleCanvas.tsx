@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react'
 
 const MOUSE_REPEL_DIST  = 120
 const MOUSE_REPEL_FORCE = 0.022
-const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789{}[]<>/\\|@#$%'
+const CHARS = 'ABCDEFGHIJKLMNjklmnopqrstuvwxyz0123456789}[<>/\\|@#$%'
 
 interface Letter {
   x: number; y: number; vx: number; vy: number
@@ -21,7 +21,7 @@ export default function ParticleCanvas() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const LETTER_COUNT = window.innerWidth < 768 ? 15 : 35
+    const LETTER_COUNT = window.innerWidth < 768 ? 10 : 25
     let W = 0, H = 0, letters: Letter[] = [], raf: number
     const mouse = { x: -9999, y: -9999 }
 
