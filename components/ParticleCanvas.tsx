@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react'
 
 const MOUSE_REPEL_DIST  = 120
 const MOUSE_REPEL_FORCE = 0.022
-const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789{}[]<>/\\|@#$%'
+const CHARS = 'ABCDEFGHIJijklmnopqrstuvwxyz0123456789}[<>/\\|@#$%'
 
 interface Letter {
   x: number; y: number; vx: number; vy: number
@@ -18,7 +18,7 @@ export default function ParticleCanvas() {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', { willReadFrequently: false})
     if (!ctx) return
 
     const LETTER_COUNT = window.innerWidth < 768 ? 10 : 25
@@ -35,10 +35,10 @@ export default function ParticleCanvas() {
     const randomChar = () => CHARS[Math.floor(Math.random() * CHARS.length)]
     const createLetter = (): Letter => ({
       x: Math.random() * W, y: Math.random() * H,
-      vx: (Math.random() - 0.5) * 0.35, vy: (Math.random() - 0.5) * 0.35,
+      vx: (Math.random() - 0.5) * 0.3, vy: (Math.random() - 0.5) * 0.3,
       char: randomChar(),
-      size: Math.random() * 14 + 14,
-      opacity: Math.random() * 0.25 + 0.10,
+      size: Math.random() * 6 + 10,
+      opacity: Math.random() * 0.2 + 0.08,
       brightness: Math.floor(Math.random() * 220),
     })
 
@@ -96,7 +96,7 @@ export default function ParticleCanvas() {
       lastH = newH
 
       resize()
-      const count = newW < 768 ? 20 : 45
+      const count = newW < 768 ? 10 : 25
 
       if (letters.length < count) {
         while (letters.length < count) letters.push(createLetter())
