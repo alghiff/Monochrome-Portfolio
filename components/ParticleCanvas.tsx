@@ -5,7 +5,7 @@ import { useEffect, useRef } from 'react'
 
 const MOUSE_REPEL_DIST  = 120
 const MOUSE_REPEL_FORCE = 0.022
-const CHARS = 'ABCDEFGHIJKLMNjklmnopqrstuvwxyz0123456789}[<>/\\|@#$%'
+const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789{}[]<>/\\|@#$%'
 
 interface Letter {
   x: number; y: number; vx: number; vy: number
@@ -23,6 +23,9 @@ export default function ParticleCanvas() {
 
     const LETTER_COUNT = window.innerWidth < 768 ? 10 : 25
     let W = 0, H = 0, letters: Letter[] = [], raf: number
+    let lastTime = 0
+    let lastW = window.innerWidth
+    let lastH = window.innerHeight
     const mouse = { x: -9999, y: -9999 }
 
     const resize = () => {
@@ -42,7 +45,16 @@ export default function ParticleCanvas() {
     resize()
     letters = Array.from({ length: LETTER_COUNT }, createLetter)
 
-    const draw = () => {
+    const draw = (timestamp: number) => {
+      const fps = window.innerWidth < 768 ? 30 : 60
+      const interval = 1000 / fps
+
+      if (timestamp - lastTime < interval) {
+        raf = requestAnimationFrame(draw)
+        return
+      }
+      lastTime = timestamp
+
       ctx.clearRect(0, 0, W, H)
       for (const l of letters) {
         l.x += l.vx; l.y += l.vy
@@ -69,20 +81,33 @@ export default function ParticleCanvas() {
       raf = requestAnimationFrame(draw)
     }
 
-    draw()
+    draw(0)
+
     window.addEventListener('mousemove',  e  => { mouse.x = e.clientX; mouse.y = e.clientY })
     window.addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999 })
     window.addEventListener('resize', () => {
+      const newW = window.innerWidth
+      const newH = window.innerHeight
+
+      // Ignore perubahan kecil — cuma address bar mobile naik turun
+      if (Math.abs(newW - lastW) < 100 && Math.abs(newH - lastH) < 100) return
+
+      lastW = newW
+      lastH = newH
+
       resize()
-      const count = window.innerWidth < 768 ? 20 : 45
-      if (letters.length !== count) {
-        letters = Array.from({ length: count }, createLetter)
-      } else {
-        letters.forEach(l => {
-          l.x = Math.min(l.x, W)
-          l.y = Math.min(l.y, H)
-        })
+      const count = newW < 768 ? 20 : 45
+
+      if (letters.length < count) {
+        while (letters.length < count) letters.push(createLetter())
+      } else if (letters.length > count) {
+        letters.splice(count)
       }
+
+      letters.forEach(l => {
+        l.x = Math.min(l.x, W)
+        l.y = Math.min(l.y, H)
+      })
     })
 
     return () => cancelAnimationFrame(raf)
